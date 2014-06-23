@@ -99,7 +99,7 @@ createLatexImage workingDir formula  =
     hClose latexFile
     system $ "latex -halt-on-error -output-directory=/tmp /tmp/temp.latex"
     system $ "dvipng -bg transparent -T tight --follow -o /tmp/temp.png /tmp/temp.dvi"
-    test <- doesFileExist "/tmp/post.png"
+    test <- doesFileExist "/tmp/temp.png"
     if test -- If image was created we copy in ./images directory, otherwise we log an error
       then
       do 
