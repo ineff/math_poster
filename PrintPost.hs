@@ -22,7 +22,10 @@ generatePost path =
     print workingDir
     test <- doesDirectoryExist $ workingDir ++ "/images"
     if test
-      then do return ()
+      then
+      do
+        system $ "rm -rf "++workingDir++"/images/*.png"
+        return ()
       else do createDirectory $ workingDir++"/images" -- we create the directory where to put images 
     source <- openFile path ReadMode
     target <- openFile (path++".html") WriteMode 
