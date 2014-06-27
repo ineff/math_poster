@@ -26,7 +26,10 @@ generatePost path =
       do
         system $ "rm -rf "++workingDir++"/images/formulas/*.png"
         return ()
-      else do createDirectory $ workingDir++"/images/formulas" -- we create the directory where to put images 
+      else
+      do
+        system $ "mkdir -p "++workingDir++"/images/formulas" -- we create the directory where to put images
+        return ()
     source <- openFile path ReadMode
     target <- openFile (path++".html") WriteMode 
     text <- BS.hGetContents source
