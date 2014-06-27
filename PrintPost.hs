@@ -45,12 +45,13 @@ generatePost path =
 printHtmlPost :: Handle -> FilePath -> Post -> IO() -- Print post in html file handle
 printHtmlPost file workingDir post =
   do
+    BS.hPutStr file "<!doctype html >\n"
     BS.hPutStr file "<html>\n"
     BS.hPutStr file "<head>\n"
     BS.hPutStr file "<title>"
     BS.hPutStr file $ title post
     BS.hPutStr file "</title>\n"
-    BS.hPutStr file "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
+    BS.hPutStr file "<meta charset=\"UTF-8\" />\n"
     BS.hPutStr file "<link rel=\"stylesheet\" type=\"text/css\" href=\"../default.css\" />\n"
     BS.hPutStr file "</head>\n"
     BS.hPutStr file "<body>\n"
@@ -77,7 +78,7 @@ printHtmlItem file workingDir (Other) =
     BS.hPutStr file "<!--This is still to define -->\n"
     
 printHtmlElement :: Handle -> FilePath -> Element -> IO()
-printHtmlElement file workingDir (PlainText string) =
+printHtmlElement file _ (PlainText string) =
   do
     BS.hPutStr file string
 printHtmlElement file workingDir (Formula formula) =
@@ -85,8 +86,21 @@ printHtmlElement file workingDir (Formula formula) =
     idFormula <- createLatexImage workingDir formula
     hPutStr file $ "<img src=\""++"./images/formulas/"
     hPutStr file idFormula
-    BS.hPutStr file ".png"
-    BS.hPutStr file "\" class=\"formula\" />"
+    BS.hPutStr file ".png\" "
+    BS.hPutStr file "alt=\"$"
+    BS.hPutStr file formula
+    BS.hPutStr file "$\" "
+    BS.hPutStr file "class=\"formula\" /> "
+printHtmlElement file _ (Cursive string) =
+  do
+    BS.hPutStr file "<em>"
+    BS.hPutStr file string
+    BS.hPutStr file "</em> "
+printHtmlElement file _ (Bold string) =
+  do
+    BS.hPutStr file "<strong>"
+    BS.hPutStr file string
+    BS.hPutStr file "</strong> "
 
 genID :: FilePath -> IO(String)
 genID workingDir =
@@ -145,4 +159,4 @@ header = BS.concat $
 closure :: BS.ByteString
 closure = "\n\\end{align*}\n\\end{document}\n"
 
-  
+

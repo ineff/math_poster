@@ -22,6 +22,8 @@ data Item = Par Paragraph
 type Paragraph = [Element]
 
 data Element = PlainText C.ByteString
+             | Cursive C.ByteString
+             | Bold C.ByteString
              | Formula C.ByteString
              deriving(Read, Show, Eq)
                    

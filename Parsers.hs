@@ -13,7 +13,7 @@ import Types
 parsePlainText :: Parser.Parser Element
 parsePlainText =
   do
-   string <- Parser.takeWhile1 (Parser.notInClass "$\n\r") -- Parse as plaintext util it finds a $ (starting a formula)
+   string <- Parser.takeWhile1 (Parser.notInClass "$*\n\r") -- Parse as plaintext util it finds a $ (starting a formula)
                                                           -- or a \n/\r which gives a newline
    return $ PlainText string
    
@@ -25,7 +25,23 @@ parseFormula =
                                                         -- the end of the formula
     Parser.string "$" -- a formula should also end with a '$'
     return $ Formula string
-    
+
+parseCursive :: Parser.Parser Element
+parseCursive =
+  do
+    Parser.string "*"
+    string <- Parser.takeWhile $ notInClass "*\n\r$"
+    Parser.string "*"
+    return $ Cursive string 
+
+parseBold :: Parser.Parser Element
+parseBold =
+  do
+    Parser.string "**"
+    string <- Parser.takeWhile $ notInClass "*\n\r$"
+    Parser.string "**"
+    return $ Bold string 
+  
 parseEOL :: Parser.Parser Element
 parseEOL =
   do
@@ -37,7 +53,7 @@ parseEOL =
 
 
 parseElement :: Parser.Parser Element
-parseElement = parsePlainText <|> parseFormula <|> parseEOL
+parseElement = parsePlainText <|> parseFormula <|> parseBold <|> parseCursive <|> parseEOL
 
 parseParagraph :: Parser.Parser Paragraph
 parseParagraph = -- A paragraph is composed by may elements ended by a doble newline
