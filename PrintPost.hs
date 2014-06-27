@@ -50,6 +50,7 @@ printHtmlPost file workingDir post =
     BS.hPutStr file "<title>"
     BS.hPutStr file $ title post
     BS.hPutStr file "</title>\n"
+    BS.hPutStr file "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
     BS.hPutStr file "<link rel=\"stylesheet\" type=\"text/css\" href=\"../default.css\" />\n"
     BS.hPutStr file "</head>\n"
     BS.hPutStr file "<body>\n"
