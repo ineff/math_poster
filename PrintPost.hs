@@ -20,13 +20,13 @@ generatePost path =
   do
     let workingDir = takeDirectory path
     print workingDir
-    test <- doesDirectoryExist $ workingDir ++ "/images"
+    test <- doesDirectoryExist $ workingDir ++ "/images/formulas"
     if test
       then
       do
-        system $ "rm -rf "++workingDir++"/images/*.png"
+        system $ "rm -rf "++workingDir++"/images/formulas/*.png"
         return ()
-      else do createDirectory $ workingDir++"/images" -- we create the directory where to put images 
+      else do createDirectory $ workingDir++"/images/formulas" -- we create the directory where to put images 
     source <- openFile path ReadMode
     target <- openFile (path++".html") WriteMode 
     text <- BS.hGetContents source
@@ -79,7 +79,7 @@ printHtmlElement file workingDir (PlainText string) =
 printHtmlElement file workingDir (Formula formula) =
   do
     idFormula <- createLatexImage workingDir formula
-    hPutStr file $ "<img src=\""++"./images/"
+    hPutStr file $ "<img src=\""++"./images/formulas/"
     hPutStr file idFormula
     BS.hPutStr file ".png"
     BS.hPutStr file "\" class=\"formula\" />"
@@ -87,7 +87,7 @@ printHtmlElement file workingDir (Formula formula) =
 genID :: FilePath -> IO(String)
 genID workingDir =
   do
-    list <- getDirectoryContents (workingDir++"/images")
+    list <- getDirectoryContents (workingDir++"/images/formulas")
     return $ show $ length list
 
 createLatexImage :: FilePath -> C.ByteString -> IO (String) -- Attempt to creata a png from a formula
@@ -103,10 +103,10 @@ createLatexImage workingDir formula  =
     system $ "latex -halt-on-error -output-directory=/tmp /tmp/temp.latex"
     system $ "dvipng -bg transparent -T tight --follow -o /tmp/temp.png /tmp/temp.dvi"
     test <- doesFileExist "/tmp/temp.png"
-    if test -- If image was created we copy in ./images directory, otherwise we log an error
+    if test -- If image was created we copy in ./images/formulas directory, otherwise we log an error
       then
       do 
-        system $ "cp /tmp/temp.png "++workingDir++"/images/"++id_image++".png"
+        system $ "cp /tmp/temp.png "++workingDir++"/images/formulas/"++id_image++".png"
         hPutStrLn log $ "Formula "++(C.unpack formula)++" correctedly created."
       else
       do
