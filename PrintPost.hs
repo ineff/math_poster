@@ -16,31 +16,52 @@ import Types
 import Parsers
 
 generatePost :: FilePath -> IO()
+-- Take a path of a file and try to generate a post from that file
 generatePost path =
   do
     let workingDir = takeDirectory path
-    print workingDir
-    test <- doesDirectoryExist $ workingDir ++ "/images/formulas"
-    if test
-      then
+    -- Create the directory where to store images and formulas for the post 
+    test <- doesDirectoryExist $ workingDir ++ "/images/formulas" 
+    if test -- if the directory exists
+      then 
       do
-        system $ "rm -rf "++workingDir++"/images/formulas/*.png"
+        system $ "rm -rf "++workingDir++"/images/formulas/*.png"-- remove the formulas created by previous compilations
         return ()
       else
-      do
+      do -- otherwise create the directories needed
         system $ "mkdir -p "++workingDir++"/images/formulas" -- we create the directory where to put images
         return ()
-    source <- openFile path ReadMode
-    target <- openFile (path++".html") WriteMode 
-    text <- BS.hGetContents source
-    case parseOnly parsePost text of
-      Right post -> do
+    source <- openFile path ReadMode -- take the file containing the source of the post
+    target <- openFile (path++".html") WriteMode  -- and the html to be written
+    css <- openFile (workingDir++"/default.css") WriteMode -- create the default css 
+    text <- BS.hGetContents source 
+    case parseOnly parsePost text of -- try to parse the source post 
+      Right post -> do -- if succeed continue to compile the html file
         printHtmlPost target workingDir post
-      Left error -> do
-        print "Problems happen"
+      Left error -> do -- otherwise fail
+        print "Problems happen" 
         print error
+    printCSS css -- write the css
     hClose source
     hClose target
+    hClose css
+
+printCSS :: Handle -> IO()
+printCSS css =
+  do
+    C.hPutStrLn css $ BS.concat[
+      "background {\n",
+      "color: #8a95b2;\n",
+      "}\n",
+      "\n",
+      "p {\n",
+      "color: black;\n",
+      "}\n",
+      "\n",
+      ".formula {\n",
+      "padding: 0 0.5em 0 0.5em;\n",
+      "}\n"
+      ]
 
 printHtmlPost :: Handle -> FilePath -> Post -> IO() -- Print post in html file handle
 printHtmlPost file workingDir post =
@@ -52,7 +73,7 @@ printHtmlPost file workingDir post =
     BS.hPutStr file $ title post
     BS.hPutStr file "</title>\n"
     BS.hPutStr file "<meta charset=\"UTF-8\" />\n"
-    BS.hPutStr file "<link rel=\"stylesheet\" type=\"text/css\" href=\"../default.css\" />\n"
+    BS.hPutStr file "<link rel=\"stylesheet\" type=\"text/css\" href=\"./default.css\" />\n"
     BS.hPutStr file "</head>\n"
     BS.hPutStr file "<body>\n"
     BS.hPutStr file "<h3>"
@@ -61,8 +82,9 @@ printHtmlPost file workingDir post =
     printHtmlItems file workingDir $ items post
     BS.hPutStr file "</body>\n"
     BS.hPutStr file "</html>\n"
-    
-printHtmlItems :: Handle -> FilePath -> [Item] -> IO()
+
+-- Auxiliary functions to print the various elements parsed by the post    
+printHtmlItems :: Handle -> FilePath -> [Item] -> IO() 
 printHtmlItems file workingDir list =
   do
     mapM_ (printHtmlItem file workingDir) list
@@ -91,7 +113,7 @@ printHtmlElement file workingDir (Formula formula) =
     BS.hPutStr file formula
     BS.hPutStr file "$\" "
     BS.hPutStr file "class=\"formula\" /> "
-printHtmlElement file _ (Cursive string) =
+printHtmlElement file _ (Italic string) =
   do
     BS.hPutStr file "<em>"
     BS.hPutStr file string
@@ -103,6 +125,7 @@ printHtmlElement file _ (Bold string) =
     BS.hPutStr file "</strong> "
 
 genID :: FilePath -> IO(String)
+-- auxliary function to generate a number for the formula/image
 genID workingDir =
   do
     list <- getDirectoryContents (workingDir++"/images/formulas")
@@ -132,6 +155,8 @@ createLatexImage workingDir formula  =
     hClose log -- Once we finish we close the log file
     return id_image
 
+
+-- Default piece of code to be used for compiling formulas
 header :: BS.ByteString
 header = BS.concat $
          ["\\documentclass{article}\n",
@@ -158,5 +183,9 @@ header = BS.concat $
          
 closure :: BS.ByteString
 closure = "\n\\end{align*}\n\\end{document}\n"
+
+
+
+
 
 

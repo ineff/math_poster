@@ -11,30 +11,34 @@ import Data.Attoparsec.ByteString.Char8 as Parser
 import Types
 
 parsePlainText :: Parser.Parser Element
+-- Parse an element which is simple text
 parsePlainText =
   do
    string <- Parser.takeWhile1 (Parser.notInClass "$*\n\r") -- Parse as plaintext util it finds a $ (starting a formula)
-                                                          -- or a \n/\r which gives a newline
+                                                          -- or a \n/\r which gives a newline or * which start a italic or bord part
    return $ PlainText string
    
 parseFormula :: Parser.Parser Element
+-- parse an element which is a latex formula
 parseFormula =
   do
     Parser.string "$" -- Try to match the starting '$'
     string <- Parser.takeWhile1 (Parser.notInClass "$") -- continue to get characters until it gets a '$' which gives
                                                         -- the end of the formula
-    Parser.string "$" -- a formula should also end with a '$'
+    Parser.string "$" -- check that the text end with a '$'
     return $ Formula string
 
-parseCursive :: Parser.Parser Element
-parseCursive =
+parseItalic :: Parser.Parser Element
+-- Parse an element which is simple text to be displayed as italic
+parseItalic =
   do
-    Parser.string "*"
-    string <- Parser.takeWhile $ notInClass "*\n\r$"
-    Parser.string "*"
-    return $ Cursive string 
+    Parser.string "*" 
+    string <- Parser.takeWhile $ notInClass "*\n\r$" 
+    Parser.string "*" 
+    return $ Italic string 
 
 parseBold :: Parser.Parser Element
+-- Parse an element which is simple text to be displayed as bold
 parseBold =
   do
     Parser.string "**"
@@ -43,6 +47,7 @@ parseBold =
     return $ Bold string 
   
 parseEOL :: Parser.Parser Element
+-- Parse an end of line character
 parseEOL =
   do
     Parser.endOfLine
@@ -53,7 +58,8 @@ parseEOL =
 
 
 parseElement :: Parser.Parser Element
-parseElement = parsePlainText <|> parseFormula <|> parseBold <|> parseCursive <|> parseEOL
+-- Combine the previous parsers
+parseElement = parsePlainText <|> parseFormula <|> parseBold <|> parseItalic <|> parseEOL
 
 parseParagraph :: Parser.Parser Paragraph
 parseParagraph = -- A paragraph is composed by may elements ended by a doble newline

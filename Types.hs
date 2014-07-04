@@ -12,17 +12,18 @@ data Post = Post {
   items :: [Item]
   } deriving(Read, Show, Eq)
 
--- An item can either be a paragraph or another html element
+-- An item can either be a paragraph or another object
+-- (to be extended)
 data Item = Par Paragraph
           | Other deriving(Read, Show, Eq)
 
 -- A paragraph is built of many different elements:
 -- it contains plain text, bold text and cursive text
--- but also formulas and list
+-- but also formulas and list(to be implemented)
 type Paragraph = [Element]
 
 data Element = PlainText C.ByteString
-             | Cursive C.ByteString
+             | Italic C.ByteString
              | Bold C.ByteString
              | Formula C.ByteString
              deriving(Read, Show, Eq)
