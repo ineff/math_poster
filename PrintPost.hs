@@ -50,8 +50,8 @@ printCSS :: Handle -> IO()
 printCSS css =
   do
     C.hPutStrLn css $ BS.concat[
-      "background {\n",
-      "color: #8a95b2;\n",
+      "body {\n",
+      "background-color: black;\n",
       "}\n",
       "\n",
       "p {\n",
@@ -60,6 +60,20 @@ printCSS css =
       "\n",
       ".formula {\n",
       "padding: 0 0.5em 0 0.5em;\n",
+      "}\n",
+      ".post {\n",
+      "background-color: #eee;\n",
+      "margin-right: 25%;\n",
+      "margin-left: 25%;\n",
+      "padding: 0.5%;\n",
+      "}\n",
+      "#banner {\n",
+      "color: white;\n",
+      "position: relative;\n",
+      "text-align: center;\n",
+      "}\n",
+      ".title {\n",
+      "color: #004d05;\n",
       "}\n"
       ]
 
@@ -72,14 +86,21 @@ printHtmlPost file workingDir post =
     BS.hPutStr file "<title>"
     BS.hPutStr file $ title post
     BS.hPutStr file "</title>\n"
-    BS.hPutStr file "<meta charset=\"UTF-8\" />\n"
+    BS.hPutStr file "<meta charset=\"utf-8\" />\n"
     BS.hPutStr file "<link rel=\"stylesheet\" type=\"text/css\" href=\"./default.css\" />\n"
     BS.hPutStr file "</head>\n"
     BS.hPutStr file "<body>\n"
-    BS.hPutStr file "<h3>"
+    BS.hPutStr file "<div id=\"banner\">\n"
+    BS.hPutStr file "   <h1>N-espresso</h1>\n"
+    hPutStr file    "   <h2>la versione italiana del n-category café</h2>\n"
+    BS.hPutStr file "   <h3>(o almeno ci prova)</h3>\n"
+    BS.hPutStr file "</div>\n"
+    BS.hPutStr file "<div class=\"post\">\n"
+    BS.hPutStr file "<h2 class=\"title\">"
     BS.hPutStr file $ title post
-    BS.hPutStr file "</h3>\n\n"
+    BS.hPutStr file "</h2>\n\n"
     printHtmlItems file workingDir $ items post
+    BS.hPutStr file "</div>\n"
     BS.hPutStr file "</body>\n"
     BS.hPutStr file "</html>\n"
 
